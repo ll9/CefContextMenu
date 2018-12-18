@@ -52,6 +52,7 @@ namespace CefContextMenu.MenuHandler
                 return true;
             }
 
+            //TODO: Trigger add point
             // React to the third ID (Display alert message)
             if (commandId == (CefMenuCommand)26503)
             {
