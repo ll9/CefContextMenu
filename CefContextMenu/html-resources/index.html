@@ -1,0 +1,90 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>Draw Features</title>
+    <link rel="stylesheet"
+          href="https://openlayers.org/en/v5.3.0/css/ol.css"
+          type="text/css" />
+    <!-- The line below is only needed for old environments like Internet Explorer and Android 4.x -->
+    <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=requestAnimationFrame,Element.prototype.classList,URL"></script>
+    <script src="https://cdn.rawgit.com/openlayers/openlayers.github.io/master/en/v5.2.0/build/ol.js"></script>
+</head>
+<body>
+    <div id="map" class="map"></div>
+    <form class="form-inline">
+        <label>Geometry type &nbsp;</label>
+        <select id="type">
+            <option value="Point">Point</option>
+            <option value="LineString">LineString</option>
+            <option value="Polygon">Polygon</option>
+            <option value="Circle">Circle</option>
+            <option value="None">None</option>
+        </select>
+    </form>
+    <script>
+      var raster = new ol.layer.Tile({
+        source: new ol.source.OSM()
+      });
+
+      var source = new ol.source.Vector({ wrapX: false });
+
+      var vector = new ol.layer.Vector({
+        source: source
+      });
+
+      var viewport = document.getElementById('map');
+
+      function getMinZoom() {
+        var width = viewport.clientWidth;
+        return Math.ceil(Math.LOG2E * Math.log(width / 256));
+      }
+
+      var initialZoom = getMinZoom();
+
+      var map = new ol.Map({
+        layers: [raster, vector],
+        target: "map",
+        view: new ol.View({
+          center: [-11000000, 4600000],
+          zoom: 4,
+          minZoom: initialZoom
+        })
+      });
+
+      var translate = new ol.interaction.Translate();
+
+      map.addInteraction(translate);
+
+      var typeSelect = document.getElementById("type");
+
+      var draw; // global so we can remove it later
+      function addInteraction() {
+        var value = typeSelect.value;
+        if (value !== "None") {
+          draw = new ol.interaction.Draw({
+            source: source,
+            type: typeSelect.value
+          });
+          map.addInteraction(draw);
+        }
+      }
+
+      /**
+       * Handle change event.
+       */
+      typeSelect.onchange = function() {
+        map.removeInteraction(draw);
+        addInteraction();
+      };
+
+      addInteraction();
+
+      window.addEventListener("resize", function() {
+        var minZoom = getMinZoom();
+        if (minZoom !== map.getView().getMinZoom()) {
+          map.getView().setMinZoom(minZoom);
+        }
+      });
+    </script>
+</body>
+</html>
